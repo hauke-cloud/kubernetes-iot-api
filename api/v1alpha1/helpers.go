@@ -79,3 +79,107 @@ func UnregisterService(ctx context.Context, c client.Client, databaseName types.
 
 	return c.Status().Update(ctx, db)
 }
+
+// RegisterServiceToMQTTBridge registers a service as connected to the MQTT bridge
+// This updates the status.connectedServices field without triggering reconciliation
+func RegisterServiceToMQTTBridge(ctx context.Context, c client.Client, bridgeName types.NamespacedName, serviceName, serviceNamespace string) error {
+	bridge := &MQTTBridge{}
+	if err := c.Get(ctx, bridgeName, bridge); err != nil {
+		return err
+	}
+
+	// Check if service is already registered
+	now := metav1.NewTime(time.Now())
+	found := false
+	for i := range bridge.Status.ConnectedServices {
+		if bridge.Status.ConnectedServices[i].Name == serviceName &&
+			bridge.Status.ConnectedServices[i].Namespace == serviceNamespace {
+			// Update last seen time
+			bridge.Status.ConnectedServices[i].LastSeenTime = &now
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		// Add new service
+		bridge.Status.ConnectedServices = append(bridge.Status.ConnectedServices, ConnectedService{
+			Name:         serviceName,
+			Namespace:    serviceNamespace,
+			LastSeenTime: &now,
+		})
+	}
+
+	return c.Status().Update(ctx, bridge)
+}
+
+// UnregisterServiceFromMQTTBridge removes a service from the connected services list
+func UnregisterServiceFromMQTTBridge(ctx context.Context, c client.Client, bridgeName types.NamespacedName, serviceName, serviceNamespace string) error {
+	bridge := &MQTTBridge{}
+	if err := c.Get(ctx, bridgeName, bridge); err != nil {
+		return err
+	}
+
+	// Remove service from list
+	filtered := make([]ConnectedService, 0, len(bridge.Status.ConnectedServices))
+	for _, svc := range bridge.Status.ConnectedServices {
+		if svc.Name != serviceName || svc.Namespace != serviceNamespace {
+			filtered = append(filtered, svc)
+		}
+	}
+	bridge.Status.ConnectedServices = filtered
+
+	return c.Status().Update(ctx, bridge)
+}
+
+// RegisterServiceToDevice registers a service as interacting with the device
+// This updates the status.connectedServices field without triggering reconciliation
+func RegisterServiceToDevice(ctx context.Context, c client.Client, deviceName types.NamespacedName, serviceName, serviceNamespace string) error {
+	device := &Device{}
+	if err := c.Get(ctx, deviceName, device); err != nil {
+		return err
+	}
+
+	// Check if service is already registered
+	now := metav1.NewTime(time.Now())
+	found := false
+	for i := range device.Status.ConnectedServices {
+		if device.Status.ConnectedServices[i].Name == serviceName &&
+			device.Status.ConnectedServices[i].Namespace == serviceNamespace {
+			// Update last seen time
+			device.Status.ConnectedServices[i].LastSeenTime = &now
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		// Add new service
+		device.Status.ConnectedServices = append(device.Status.ConnectedServices, ConnectedService{
+			Name:         serviceName,
+			Namespace:    serviceNamespace,
+			LastSeenTime: &now,
+		})
+	}
+
+	return c.Status().Update(ctx, device)
+}
+
+// UnregisterServiceFromDevice removes a service from the connected services list
+func UnregisterServiceFromDevice(ctx context.Context, c client.Client, deviceName types.NamespacedName, serviceName, serviceNamespace string) error {
+	device := &Device{}
+	if err := c.Get(ctx, deviceName, device); err != nil {
+		return err
+	}
+
+	// Remove service from list
+	filtered := make([]ConnectedService, 0, len(device.Status.ConnectedServices))
+	for _, svc := range device.Status.ConnectedServices {
+		if svc.Name != serviceName || svc.Namespace != serviceNamespace {
+			filtered = append(filtered, svc)
+		}
+	}
+	device.Status.ConnectedServices = filtered
+
+	return c.Status().Update(ctx, device)
+}

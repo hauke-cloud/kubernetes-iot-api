@@ -21,12 +21,13 @@ import (
 )
 
 // SecretReference contains information to locate a Kubernetes Secret
+// SecretReference represents a reference to a Kubernetes Secret
 type SecretReference struct {
 	// Name of the secret
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 
-	// Namespace of the secret. If not specified, uses the same namespace as the Database
+	// Namespace of the secret. If not specified, uses the same namespace as the resource
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 }

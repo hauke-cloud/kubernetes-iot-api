@@ -43,17 +43,44 @@ spec:
     - temperature
 ```
 
-### Future CRDs
+### MQTTBridge
 
-When other CRDs are moved here, they will all be accessible through the same import:
+Represents an MQTT broker connection for collecting IoT sensor data.
 
-```go
-import iotv1alpha1 "github.com/hauke-cloud/kubernetes-iot-api/api/v1alpha1"
+**Used by**:
+- [mqtt-sensor-exporter](https://github.com/hauke-cloud/mqtt-sensor-exporter) - MQTT data collector operator
 
-// Access any CRD:
-db := &iotv1alpha1.Database{}
-bridge := &iotv1alpha1.MQTTBridge{}  // If moved here
-device := &iotv1alpha1.Device{}      // If moved here
+**Example**:
+```yaml
+apiVersion: iot.hauke.cloud/v1alpha1
+kind: MQTTBridge
+metadata:
+  name: tasmota-bridge
+spec:
+  host: mosquitto.mqtt.svc.cluster.local
+  port: 1883
+  deviceType: tasmota
+  credentialsSecretRef:
+    name: mqtt-credentials
+```
+
+### Device
+
+Represents an IoT device discovered on an MQTT broker.
+
+**Used by**:
+- [mqtt-sensor-exporter](https://github.com/hauke-cloud/mqtt-sensor-exporter) - Tracks discovered devices
+
+**Example**:
+```yaml
+apiVersion: iot.hauke.cloud/v1alpha1
+kind: Device
+metadata:
+  name: sensor-001
+spec:
+  bridgeRef:
+    name: tasmota-bridge
+  friendlyName: "Living Room Sensor"
 ```
 
 ## Installation
