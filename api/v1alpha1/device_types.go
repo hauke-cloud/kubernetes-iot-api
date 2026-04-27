@@ -124,10 +124,6 @@ type DeviceStatus struct {
 	// +optional
 	Manufacturer string `json:"manufacturer,omitempty"`
 
-	// DeviceType indicates the type of device (e.g., sensor, actuator, switch)
-	// +optional
-	DeviceType string `json:"deviceType,omitempty"`
-
 	// LastSeen is the timestamp when the device last sent data
 	// +optional
 	LastSeen *metav1.Time `json:"lastSeen,omitempty"`
@@ -166,10 +162,8 @@ type DeviceStatus struct {
 // +kubebuilder:printcolumn:name="Short Addr",type=string,JSONPath=`.status.shortAddr`
 // +kubebuilder:printcolumn:name="Friendly Name",type=string,JSONPath=`.spec.friendlyName`
 // +kubebuilder:printcolumn:name="Sensor Type",type=string,JSONPath=`.spec.sensorType`
-// +kubebuilder:printcolumn:name="Power",type=integer,JSONPath=`.status.lastPowerState`,priority=1
 // +kubebuilder:printcolumn:name="Link Quality",type=integer,JSONPath=`.status.linkQuality`
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
-// +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.status.deviceType`
 // +kubebuilder:printcolumn:name="Available",type=boolean,JSONPath=`.status.available`
 // +kubebuilder:printcolumn:name="Last Seen",type=date,JSONPath=`.status.lastSeen`
 
