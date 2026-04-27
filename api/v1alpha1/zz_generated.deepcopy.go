@@ -348,21 +348,6 @@ func (in *DeviceStatus) DeepCopyInto(out *DeviceStatus) {
 			(*out)[key] = *val.DeepCopy()
 		}
 	}
-	if in.BatteryPercentage != nil {
-		in, out := &in.BatteryPercentage, &out.BatteryPercentage
-		*out = new(int32)
-		**out = **in
-	}
-	if in.BatteryLevel != nil {
-		in, out := &in.BatteryLevel, &out.BatteryLevel
-		*out = new(int32)
-		**out = **in
-	}
-	if in.BatteryLastSeenEpoch != nil {
-		in, out := &in.BatteryLastSeenEpoch, &out.BatteryLastSeenEpoch
-		*out = new(int64)
-		**out = **in
-	}
 	if in.LastSeenSeconds != nil {
 		in, out := &in.LastSeenSeconds, &out.LastSeenSeconds
 		*out = new(int32)

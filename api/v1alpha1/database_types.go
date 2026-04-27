@@ -134,43 +134,13 @@ type DatabaseStatus struct {
 	// +optional
 	LastConnectedTime *metav1.Time `json:"lastConnectedTime,omitempty"`
 
-	// Message provides additional information about the connection state
-	// +optional
-	Message string `json:"message,omitempty"`
-
-	// MeasurementsWritten is the total number of measurements written to this database
-	// +optional
-	MeasurementsWritten int64 `json:"measurementsWritten,omitempty"`
-
-	// LastWriteTime is the timestamp of the last successful write
-	// +optional
-	LastWriteTime *metav1.Time `json:"lastWriteTime,omitempty"`
-
-	// PendingBatch is the number of measurements waiting to be written
-	// +optional
-	PendingBatch int32 `json:"pendingBatch,omitempty"`
-
-	// ConnectedServices lists the services currently connected to this database
-	// Services register themselves here to indicate active usage
-	// +optional
-	ConnectedServices []ConnectedService `json:"connectedServices,omitempty"`
+  // Message provides additional information about the connection state
+  // +optional
+  Message string `json:"message,omitempty"`
 
 	// Conditions represent the latest available observations of the database's state
 	// +optional
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
-}
-
-// ConnectedService represents a service that is actively connected to the database
-type ConnectedService struct {
-	// Name of the service (e.g., "mqtt-sensor-exporter", "irrigator")
-	Name string `json:"name"`
-
-	// Namespace where the service is running
-	Namespace string `json:"namespace"`
-
-	// LastSeenTime is when this service last updated its connection status
-	// +optional
-	LastSeenTime *metav1.Time `json:"lastSeenTime,omitempty"`
 }
 
 // +kubebuilder:object:root=true

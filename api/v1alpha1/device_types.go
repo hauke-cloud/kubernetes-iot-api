@@ -105,28 +105,6 @@ type AlertCondition struct {
 	Value string `json:"value"`
 }
 
-// MeasurementValue represents a single measurement with its value, timestamp, and optional corrections
-type MeasurementValue struct {
-	// Value is the raw measurement value received from the device
-	// Stored as string for cross-language compatibility
-	// +kubebuilder:validation:Required
-	Value string `json:"value"`
-
-	// LastSeen is the timestamp when this measurement was last received
-	// +kubebuilder:validation:Required
-	LastSeen metav1.Time `json:"lastSeen"`
-
-	// Correction is the correction value applied to this measurement (if any)
-	// Only set if a correction was configured for this measurement
-	// +optional
-	Correction *string `json:"correction,omitempty"`
-
-	// CorrectedValue is the value after applying the correction
-	// Only set if a correction was applied
-	// +optional
-	CorrectedValue *string `json:"correctedValue,omitempty"`
-}
-
 // DeviceStatus defines the observed state of Device.
 type DeviceStatus struct {
 	// Alert show if this device triggered the alert condition
@@ -150,11 +128,6 @@ type DeviceStatus struct {
 	// +optional
 	DeviceType string `json:"deviceType,omitempty"`
 
-	// Capabilities lists what the device can measure or control
-	// Examples: temperature, humidity, pressure, battery, water_leak, occupancy
-	// +optional
-	Capabilities []string `json:"capabilities,omitempty"`
-
 	// LastSeen is the timestamp when the device last sent data
 	// +optional
 	LastSeen *metav1.Time `json:"lastSeen,omitempty"`
@@ -166,33 +139,6 @@ type DeviceStatus struct {
 	// Available indicates whether the device is currently reachable (deprecated, use Reachable)
 	// +optional
 	Available bool `json:"available,omitempty"`
-
-	// LastMeasurement contains the most recent measurement data as JSON string
-	// Deprecated: Use Measurements map instead for detailed measurement tracking
-	// +optional
-	LastMeasurement string `json:"lastMeasurement,omitempty"`
-
-	// Measurements contains individual measurements with their values, timestamps, and corrections
-	// Key is the measurement name (e.g., "temperature", "humidity", "pressure")
-	// Value contains the measurement details including corrections if applied
-	// +optional
-	Measurements map[string]MeasurementValue `json:"measurements,omitempty"`
-
-	// BatteryPercentage indicates the battery percentage (0-100) if applicable
-	// +optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:Maximum=100
-	BatteryPercentage *int32 `json:"batteryPercentage,omitempty"`
-
-	// BatteryLevel indicates the battery percentage (0-100) if applicable (deprecated, use BatteryPercentage)
-	// +optional
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:validation:Maximum=100
-	BatteryLevel *int32 `json:"batteryLevel,omitempty"`
-
-	// BatteryLastSeenEpoch is the Unix epoch timestamp when battery level was last updated
-	// +optional
-	BatteryLastSeenEpoch *int64 `json:"batteryLastSeenEpoch,omitempty"`
 
 	// LastSeenSeconds is the number of seconds since the device was last seen
 	// +optional
@@ -208,17 +154,6 @@ type DeviceStatus struct {
 	// +kubebuilder:validation:Maximum=255
 	LinkQuality *int32 `json:"linkQuality,omitempty"`
 
-	// LastPowerState contains the most recent power state for devices that support power control/sensing
-	// This field provides a stable reference for monitoring valve states and other power-controlled devices
-	// Typically 0 (off) or 1 (on), but may vary by device type
-	// +optional
-	LastPowerState *int32 `json:"lastPowerState,omitempty"`
-
-	// ConnectedServices lists the services currently interacting with this device
-	// Services register themselves here to indicate active usage (e.g., data collection, control)
-	// +optional
-	ConnectedServices []ConnectedService `json:"connectedServices,omitempty"`
-
 	// Conditions represent the current state of the Device resource.
 	// +listType=map
 	// +listMapKey=type
@@ -232,12 +167,10 @@ type DeviceStatus struct {
 // +kubebuilder:printcolumn:name="Friendly Name",type=string,JSONPath=`.spec.friendlyName`
 // +kubebuilder:printcolumn:name="Sensor Type",type=string,JSONPath=`.spec.sensorType`
 // +kubebuilder:printcolumn:name="Power",type=integer,JSONPath=`.status.lastPowerState`,priority=1
-// +kubebuilder:printcolumn:name="Battery",type=integer,JSONPath=`.status.batteryPercentage`
 // +kubebuilder:printcolumn:name="Link Quality",type=integer,JSONPath=`.status.linkQuality`
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 // +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.status.deviceType`
 // +kubebuilder:printcolumn:name="Available",type=boolean,JSONPath=`.status.available`
-// +kubebuilder:printcolumn:name="Battery",type=integer,JSONPath=`.status.batteryLevel`
 // +kubebuilder:printcolumn:name="Last Seen",type=date,JSONPath=`.status.lastSeen`
 
 // Device is the Schema for the devices API

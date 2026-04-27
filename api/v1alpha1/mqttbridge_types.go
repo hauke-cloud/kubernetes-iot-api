@@ -46,12 +46,6 @@ type MQTTBridgeSpec struct {
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty"`
 
-	// TopicPrefix is the base topic to subscribe to for device discovery
-	// For Zigbee2MQTT, this is typically "zigbee2mqtt"
-	// For Tasmota with multiple topics, use Topics field instead
-	// +optional
-	TopicPrefix string `json:"topicPrefix,omitempty"`
-
 	// Topics is a list of topic subscriptions with their types
 	// Use this for advanced configurations like Tasmota with multiple topic types
 	// If specified, TopicPrefix is ignored
@@ -139,18 +133,13 @@ type MQTTBridgeStatus struct {
 	// +optional
 	LastConnectedTime *metav1.Time `json:"lastConnectedTime,omitempty"`
 
+  // Message provides additional information about the current state
+  // +optional
+  Message string `json:"message,omitempty"`
+
 	// DiscoveredDevices is the number of devices discovered on this bridge
 	// +optional
 	DiscoveredDevices int32 `json:"discoveredDevices,omitempty"`
-
-	// ConnectedServices lists the services currently connected to this MQTT bridge
-	// Services register themselves here to indicate active usage
-	// +optional
-	ConnectedServices []ConnectedService `json:"connectedServices,omitempty"`
-
-	// Message provides additional information about the current state
-	// +optional
-	Message string `json:"message,omitempty"`
 
 	// Conditions represent the current state of the MQTTBridge resource.
 	// +listType=map
