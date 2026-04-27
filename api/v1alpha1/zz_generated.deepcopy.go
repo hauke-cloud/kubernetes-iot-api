@@ -488,20 +488,6 @@ func (in *MQTTBridgeSpec) DeepCopyInto(out *MQTTBridgeSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	if in.StateTopics != nil {
-		in, out := &in.StateTopics, &out.StateTopics
-		*out = make([]TopicSubscription, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
-	}
-	if in.SensorTopics != nil {
-		in, out := &in.SensorTopics, &out.SensorTopics
-		*out = make([]TopicSubscription, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
-	}
 	if in.DiscoveryEnabled != nil {
 		in, out := &in.DiscoveryEnabled, &out.DiscoveryEnabled
 		*out = new(bool)
