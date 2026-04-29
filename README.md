@@ -70,6 +70,7 @@ Represents an IoT device discovered on an MQTT broker.
 
 **Used by**:
 - [mqtt-sensor-exporter](https://github.com/hauke-cloud/mqtt-sensor-exporter) - Tracks discovered devices
+- [irrigator](https://github.com/hauke-cloud/irrigator) - Watches devices for irrigation control
 
 **Example**:
 ```yaml
@@ -81,6 +82,27 @@ spec:
   bridgeRef:
     name: tasmota-bridge
   friendlyName: "Living Room Sensor"
+```
+
+### Schedule
+
+Represents an irrigation schedule for valve devices.
+
+**Used by**:
+- [irrigator](https://github.com/hauke-cloud/irrigator) - Irrigation scheduler and controller
+
+**Example**:
+```yaml
+apiVersion: iot.hauke.cloud/v1alpha1
+kind: Schedule
+metadata:
+  name: morning-watering
+spec:
+  deviceName: garden-valve-1
+  cronExpression: "0 6 * * *"
+  durationSeconds: 1800
+  enabled: true
+  timeZone: "Europe/Berlin"
 ```
 
 ## Installation
