@@ -1,235 +1,236 @@
-# Kubernetes IoT API
+<!-- llm-readme-management spec=1 commit=634ec964adc19959a719f530a135e889a68015f5 template=terraform model=qwen3.8-27b-q4 digest=f68682b55584 generated=2026-10-12T07:47:19Z -->
+<a href="https://hauke.cloud" target="_blank"><img src="https://img.shields.io/badge/home-hauke.cloud-brightgreen" alt="hauke.cloud" style="display: block;" /></a>
+<a href="https://github.com/hauke-cloud" target="_blank"><img src="https://img.shields.io/badge/github-hauke.cloud-blue" alt="hauke.cloud Github Organisation" style="display: block;" /></a>
+<a href="https://github.com/hauke-cloud/llm-readme-management" target="_blank"><img src="https://img.shields.io/badge/template-terraform-orange" alt="Repository type - terraform" style="display: block;" /></a>
+
+
+# Template Repository
+
 
 <img src="https://raw.githubusercontent.com/hauke-cloud/.github/main/resources/img/organisation-logo-small.png" alt="hauke.cloud logo" width="109" height="123" align="right">
 
-Shared Kubernetes Custom Resource Definitions (CRDs) for the hauke.cloud IoT infrastructure.
 
-## Overview
+<llm header hint="Say whether this is a reusable module or a root module that owns real state.">
 
-This repository contains Kubernetes API type definitions (`iot.hauke.cloud/v1alpha1`) that are shared across multiple hauke.cloud IoT services. By consolidating CRDs in a single repository, we ensure consistency and avoid duplication.
+This Go module provides the Kubernetes Custom Resource Definition type definitions for the hauke.cloud IoT platform, grouped under `iot.hauke.cloud/v1alpha1`. It is a reusable library you import into your own operator or service code to declare `Database`, `MQTTBridge`, `Device`, and `Schedule` resources. It is written for developers building the hauke-cloud operator projects.
 
-## API Group
+</llm>
 
-All CRDs in this repository use the API group: **`iot.hauke.cloud/v1alpha1`**
 
-## CRDs
+## :book: Description
 
-All CRDs are in the `api/v1alpha1` package and share the `iot.hauke.cloud/v1alpha1` API group.
+<llm description>
 
-### Database
+This repository provides the Go type definitions for the Kubernetes Custom Resource Definitions (CRDs) used by the hauke.cloud IoT platform. If you are building a Kubernetes operator or service that reads, writes, or reconciles IoT resources, you import these types as a library rather than redefining them locally.
 
-Represents a PostgreSQL/TimescaleDB database connection for storing IoT sensor data.
-
-**Used by**:
-- [database-manager](https://github.com/hauke-cloud/database-manager) - Manages database connections and lifecycle
-- [mqtt-sensor-exporter](https://github.com/hauke-cloud/mqtt-sensor-exporter) - Stores MQTT sensor data
-- Other IoT services that need database storage
-
-**Example**:
-```yaml
-apiVersion: iot.hauke.cloud/v1alpha1
-kind: Database
-metadata:
-  name: sensors-db
-spec:
-  host: postgres.default.svc.cluster.local
-  port: 5432
-  database: sensors
-  username: app
-  passwordSecretRef:
-    name: db-credentials
-  supportedSensorTypes:
-    - moisture
-    - temperature
-```
-
-### MQTTBridge
-
-Represents an MQTT broker connection for collecting IoT sensor data.
-
-**Used by**:
-- [mqtt-sensor-exporter](https://github.com/hauke-cloud/mqtt-sensor-exporter) - MQTT data collector operator
-
-**Example**:
-```yaml
-apiVersion: iot.hauke.cloud/v1alpha1
-kind: MQTTBridge
-metadata:
-  name: tasmota-bridge
-spec:
-  host: mosquitto.mqtt.svc.cluster.local
-  port: 1883
-  deviceType: tasmota
-  credentialsSecretRef:
-    name: mqtt-credentials
-```
-
-### Device
-
-Represents an IoT device discovered on an MQTT broker.
-
-**Used by**:
-- [mqtt-sensor-exporter](https://github.com/hauke-cloud/mqtt-sensor-exporter) - Tracks discovered devices
-- [irrigator](https://github.com/hauke-cloud/irrigator) - Watches devices for irrigation control
-
-**Example**:
-```yaml
-apiVersion: iot.hauke.cloud/v1alpha1
-kind: Device
-metadata:
-  name: sensor-001
-spec:
-  bridgeRef:
-    name: tasmota-bridge
-  friendlyName: "Living Room Sensor"
-```
-
-### Schedule
-
-Represents an irrigation schedule for valve devices.
-
-**Used by**:
-- [irrigator](https://github.com/hauke-cloud/irrigator) - Irrigation scheduler and controller
-
-**Example**:
-```yaml
-apiVersion: iot.hauke.cloud/v1alpha1
-kind: Schedule
-metadata:
-  name: morning-watering
-spec:
-  deviceName: garden-valve-1
-  cronExpression: "0 6 * * *"
-  durationSeconds: 1800
-  enabled: true
-  timeZone: "Europe/Berlin"
-```
-
-## Installation
+The module exposes a single package, `api/v1alpha1`, under the API group `iot.hauke.cloud/v1alpha1`. It contains struct definitions with kubebuilder validation markers, a shared `SecretReference` helper, scheme-registration boilerplate, and generated `DeepCopy` methods. You add it to your project with:
 
 ```bash
 go get github.com/hauke-cloud/kubernetes-iot-api@v0.1.0
 ```
 
-## Usage
+The four CRD types defined here are:
 
-### Single Import for All CRDs
+- **Database** – declarative PostgreSQL/TimescaleDB connection for storing IoT sensor data, with SSL, pooling, and batching parameters.
+- **MQTTBridge** – MQTT broker connection with per-topic subscriptions, TLS, and device discovery.
+- **Device** – an IoT device discovered on a bridge, carrying sensor type, alert conditions, and reachability status.
+- **Schedule** – a cron-driven irrigation schedule for valve devices with optional execution conditions.
 
-One import statement gives you access to all CRDs in the API group:
+These types are consumed by the `hauke-cloud/database-manager`, `hauke-cloud/mqtt-sensor-exporter`, and `hauke-cloud/irrigator` operators, which install the corresponding CRDs into a cluster and act on the resources you create.
 
-```go
-import iotv1alpha1 "github.com/hauke-cloud/kubernetes-iot-api/api/v1alpha1"
+</llm>
 
-// Use any CRD from the package:
-db := &iotv1alpha1.Database{}
-dbList := &iotv1alpha1.DatabaseList{}
 
-// Future CRDs (when added):
-// bridge := &iotv1alpha1.MQTTBridge{}
-// device := &iotv1alpha1.Device{}
+## :clipboard: Requirements
+
+<llm requirements hint="Give the Terraform version from .terraform-version and the provider constraints from versions.tf, plus the credentials the providers need.">
+
+- **Go 1.25.3** — the toolchain version pinned in `go.mod`. You need it to build the module or run `go mod tidy`.
+- **`controller-gen`** (from `sigs.k8s.io/controller-tools`) — required only if you modify the CRD type definitions and need to regenerate `zz_generated.deepcopy.go`.
+- **`pre-commit`** — mandatory for contributors per `CONTRIBUTING.md`. Install the hooks with `pre-commit install` before pushing.
+
+No Kubernetes cluster, cloud credentials, or Terraform/OpenTofu installation is required to use this repository. It is a Go type-definition library; the `.terraform-version` and `.opentofu-version` files at the repo root are vestigial and referenced by no code. Consumers who later deploy the CRDs into a cluster need that cluster and the consuming operators (`database-manager`, `mqtt-sensor-exporter`, `irrigator`), but that deployment is outside the scope of this repository.
+
+</llm>
+
+
+## 🚀 Getting started
+
+<llm getting_started hint="terraform init, plan and apply, with the backend configuration the repository actually uses. Say plainly if apply touches real infrastructure.">
+
+1. Clone the repository and enter the working directory.
+
+```bash
+git clone https://github.com/hauke-cloud/kubernetes-iot-api.git
+cd kubernetes-iot-api
 ```
 
-### Importing in Your Project
+2. Resolve module dependencies.
+
+```bash
+go mod tidy
+```
+
+3. Verify the library compiles.
+
+```bash
+go build ./...
+```
+
+This repository is a Go type-definition library, not a Terraform project. The `.opentofu-version` and `.terraform-version` files at the root are vestigial; no `.tf` or `.hcl` files exist. Once the build succeeds, the module is ready to be imported by consumer operators (`hauke-cloud/database-manager`, `hauke-cloud/mqtt-sensor-exporter`, `hauke-cloud/irrigator`) via:
+
+```bash
+go get github.com/hauke-cloud/kubernetes-iot-api@v0.1.0
+```
+
+No cluster, credentials, or infrastructure provisioning is required to use the library. The CRD YAML manifests are not checked in here; the consuming operators are responsible for installing them into a target cluster.
+
+</llm>
+
+
+## :airplane: Usage
+
+<llm usage hint="For a reusable module, the central example is a module block with source, version and the required variables filled in from variables.tf. For a root module, show the workflow instead.">
+
+This repository is a Go type-definition library. You import it from operator projects (for example `hauke-cloud/database-manager`, `hauke-cloud/mqtt-sensor-exporter`, `hauke-cloud/irrigator`) to work with the `iot.hauke.cloud/v1alpha1` CRD types.
+
+**Add the dependency**
+
+```bash
+go get github.com/hauke-cloud/kubernetes-iot-api@v0.1.0
+```
+
+**Register the CRD scheme in your operator**
+
+Import the `v1alpha1` package and register it with your controller-runtime scheme:
 
 ```go
 import (
     iotv1alpha1 "github.com/hauke-cloud/kubernetes-iot-api/api/v1alpha1"
 )
 
-// Register with scheme
-utilruntime.Must(iotv1alpha1.AddToScheme(scheme))
+iotv1alpha1.AddToScheme(scheme)
 ```
 
-### Example: Watching Database Resources
+**Define CR manifests**
 
-```go
-func (r *YourReconciler) SetupWithManager(mgr ctrl.Manager) error {
-    return ctrl.NewControllerManagedBy(mgr).
-        For(&yourv1alpha1.YourResource{}).
-        Watches(
-            &iotv1alpha1.Database{},
-            handler.EnqueueRequestsFromMapFunc(r.findResourcesUsingDatabase),
-        ).
-        Complete(r)
-}
+Once the consuming operator is running, you create custom resources in your cluster. For example, a `Database` CR that the `database-manager` operator reconciles:
+
+```yaml
+apiVersion: iot.hauke.cloud/v1alpha1
+kind: Database
+metadata:
+  name: sensor-db
+  namespace: iot
+spec:
+  host: timescale.internal
+  port: 5432
+  database: iot_sensors
+  username: iot_writer
+  passwordSecretRef:
+    name: db-password
+  sslMode: require
+  supportedSensorTypes:
+    - temperature
+    - humidity
+    - moisture
+  maxConnections: 20
+  batchSize: 200
+  batchTimeout: 15
 ```
 
-### Example: Registering Service with Database
+The referenced Secret must contain a key named `password`.
 
-```go
-import (
-    iotv1alpha1 "github.com/hauke-cloud/kubernetes-iot-api/api/v1alpha1"
-    "k8s.io/apimachinery/pkg/types"
-)
+**Regenerate deepcopy code (contributors)**
 
-// Register your service as connected to a database
-err := iotv1alpha1.RegisterService(
-    ctx,
-    client,
-    types.NamespacedName{Name: "sensors-db", Namespace: "default"},
-    "my-service",
-    "my-namespace",
-)
-```
-
-## Development
-
-### Generating Code
-
-After modifying types, regenerate the deepcopy code:
+After modifying any type in `api/v1alpha1/`, regenerate the DeepCopy methods:
 
 ```bash
 controller-gen object:headerFile=hack/boilerplate.go.txt paths="./..."
 ```
 
-### Testing
+</llm>
+
+
+## :wrench: Configuration
+
+<llm configuration hint="A table of the variables in variables.tf: name, type, default, required. Point at variables.tf for the full set and mention outputs.tf if it exists.">
+
+This repository is a Go type-definition library, not a Terraform project. It exposes no Terraform variables, Helm values, environment variables, or CLI flags. The configuration surface is the CRD spec fields in `api/v1alpha1/`, which you set in Kubernetes Custom Resource manifests consumed by operators such as `hauke-cloud/database-manager` and `hauke-cloud/irrigator`.
+
+The table below lists the required and defaulted fields for each CRD. The complete field set lives in `database_types.go`, `mqttbridge_types.go`, `device_types.go`, and `schedule_types.go` in that directory.
+
+| CRD | Field | Type | Default | Required | Description |
+|-----|-------|------|---------|----------|-------------|
+| Database | host | string | — | yes | PostgreSQL/TimescaleDB host |
+| Database | port | int | 5432 | yes | Database port |
+| Database | database | string | — | yes | Database name |
+| Database | username | string | — | yes | Database user |
+| Database | sslMode | string | require | no | disable / require / verify-ca / verify-full |
+| Database | maxConnections | int | 10 | no | Pool max (≤ 100) |
+| Database | batchSize | int | 100 | no | Batch size (≤ 1000) |
+| MQTTBridge | host | string | — | yes | Broker host |
+| MQTTBridge | port | int | 1883 | no | Broker port |
+| MQTTBridge | deviceType | string | tasmota | no | zigbee2mqtt / tasmota / generic |
+| Device | bridgeRef.name | string | — | yes | Name of the MQTTBridge |
+| Device | ieeeAddr | string | — | yes | IEEE address of the device |
+| Schedule | cronExpression | string | — | yes | Cron expression |
+| Schedule | durationSeconds | int | — | yes | Run duration (1–86400) |
+| Schedule | timeZone | string | UTC | no | IANA time zone |
+
+Optional fields such as `credentialsSecretRef`, `topics`, `corrections`, `alertCondition`, and `executionConditions` are defined in the same source files.
+
+</llm>
+
+
+## :hammer: Development
+
+<llm development hint="Cover terraform fmt, validate, tflint and terraform-docs where the repository configures them.">
+
+This repository contains no test files. The build check is:
 
 ```bash
 go mod tidy
 go build ./...
 ```
 
-## Versioning
-
-This project follows semantic versioning. The current version is shown in git tags.
-
-To use a specific version:
+After modifying any type in `api/v1alpha1/`, regenerate the DeepCopy methods and commit the result:
 
 ```bash
-go get github.com/hauke-cloud/kubernetes-iot-api@v0.1.0
+controller-gen object:headerFile=hack/boilerplate.go.txt paths="./..."
 ```
 
-## Architecture
+The generated file is `api/v1alpha1/zz_generated.deepcopy.go`. Do not edit it by hand; a stale copy will cause a build failure in downstream consumers.
 
-### Why a Shared API Repository?
+Install the pre-commit hooks before your first commit:
 
-1. **Consistency**: Single source of truth for shared types
-2. **No Duplication**: Avoid copying CRD definitions across services
-3. **Lightweight**: Import only type definitions, not controller logic
-4. **Versioning**: Independent version lifecycle from operators
-5. **Best Practice**: Follows Kubernetes ecosystem patterns (like `k8s.io/api`)
+```bash
+pre-commit install
+pre-commit run --all-files
+```
 
-### Comparison to Other Projects
+The configured hooks are `pre-commit-hooks v4.4.0` and `gitleaks v8.18.0`. A failing hook blocks the local commit.
 
-This pattern is used by:
-- Kubernetes: `k8s.io/api` vs `k8s.io/kubernetes`
-- cert-manager: Separate API package
-- Istio: `istio.io/api` vs `istio.io/istio`
+CI enforces a conventional-commit title on every pull request via `amannn/action-semantic-pull-request`. A title such as `feat: add Schedule CRD` passes; a free-form title such as `added schedule` does not.
 
-## Related Projects
+There is no Makefile, no `terraform fmt`, `terraform validate`, `tflint`, or `terraform-docs` step, and no linter beyond the pre-commit hooks. The `.opentofu-version` and `.terraform-version` files at the repository root are vestigial; no Terraform or OpenTofu code exists in this repository.
 
-- [database-manager](https://github.com/hauke-cloud/database-manager) - Database operator
-- [mqtt-sensor-exporter](https://github.com/hauke-cloud/mqtt-sensor-exporter) - MQTT sensor data collector
-- [irrigator](https://github.com/hauke-cloud/irrigator) - Irrigation controller
+</llm>
 
-## Contributing
+
+## 📄 License
+
+This Project is licensed under the GNU General Public License v3.0
+
+- see the [LICENSE](LICENSE) file for details.
+
+
+## :coffee: Contributing
 
 To become a contributor, please check out the [CONTRIBUTING](CONTRIBUTING.md) file.
 
-## License
 
-This Project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details.
+## :email: Contact
 
-## Contact
-
-For any inquiries or support requests, please open an issue in this repository or contact us at [contact@hauke.cloud](mailto:contact@hauke.cloud).
+For any inquiries or support requests, please open an issue in this
+repository or contact us at [contact@hauke.cloud](mailto:contact@hauke.cloud).
